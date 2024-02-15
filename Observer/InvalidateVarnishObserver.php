@@ -81,14 +81,14 @@ class InvalidateVarnishObserver implements ObserverInterface
                         \Magento\Framework\Debugger::getInstance()->log(__METHOD__, ['tag_is_array' => $tag]);
                         continue;
                     }
-                    if ($tag == "cpg_402" || $tag == "cms_p_402") {
-                        \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
-                            'tag' => $tag,
-                            'conv_tag' => $this->cacheTags->convertCacheTags($tag),
-                            'already_purged' => $this->alreadyPurged,
-                            'tags' => $tags
-                        ]);
-                    }
+
+                    \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
+                        'tag' => $tag,
+                        'conv_tag' => $this->cacheTags->convertCacheTags($tag),
+                        'already_purged' => $this->alreadyPurged,
+                        'tags' => $tags
+                    ]);
+
                     $tag = $this->cacheTags->convertCacheTags($tag);
                     if (!in_array($tag, $this->alreadyPurged)) {
                         $tags[] = $tag;
@@ -97,11 +97,9 @@ class InvalidateVarnishObserver implements ObserverInterface
                 }
 
                 if (!empty($tags)) {
-                    if ($tag == "cpg_402" || $tag == "cms_p_402") {
-                        \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
-                            'tag_to_purge' => $tags
-                        ]);
-                    }
+                    \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
+                        'tag_to_purge' => $tags
+                    ]);
                     $this->purgeCache->sendPurgeRequest(array_unique($tags));
                 }
             }
