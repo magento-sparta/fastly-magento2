@@ -65,6 +65,12 @@ class PurgeCache
             $result = $this->api->cleanUrl($pattern);
         } elseif (is_array($pattern)) {
             $result = $this->api->cleanBySurrogateKey($pattern);
+            if (in_array(["cpg_402", "cms_p_402"], $pattern)) {
+                \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
+                    'pattern' => $pattern,
+                    'result' => $result
+                ]);
+            }
         } else {
             return false;
         }

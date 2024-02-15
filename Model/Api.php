@@ -217,6 +217,16 @@ class Api
         foreach ($collection as $keys) {
             $payload = json_encode(['surrogate_keys' => $keys]);
             $result = $this->_purge($uri, null, Request::METHOD_POST, $payload);
+
+
+            if (in_array(["cpg_402", "cms_p_402"], $keys)) {
+                \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
+                    'keys' => $keys,
+                    'result' => $result,
+                    'payload' => $payload
+                ]);
+            }
+
             if ($result['status']) {
                 foreach ($keys as $key) {
                     $this->logger->execute('surrogate key: ' . $key);
@@ -334,6 +344,18 @@ class Api
             $responseCode = $response->getStatusCode();
             $responseMessage = $response->getReasonPhrase();
 
+
+            if (stripos("cpg_402", $payload) !== false || stripos("cms_p_402", $payload) !== false) {
+                \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
+                    'payload' => $payload,
+                    'method' => $method,
+                    'responseCode' => $responseCode,
+                    'responseMessage' => $responseMessage,
+                    'headers' => $headers->toArray(),
+                    'uri' => $uri
+                ]);
+            }
+
             // check response
             if ($responseCode == '429') {
                 throw new LocalizedException(__($responseMessage));
@@ -344,6 +366,11 @@ class Api
             $this->logger->critical($e->getMessage(), $uri);
             $result['status'] = false;
             $result['msg'] = $e->getMessage();
+
+            \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
+                'result' => $result
+            ]);
+
         }
 
         if (empty($type)) {
