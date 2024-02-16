@@ -215,14 +215,18 @@ class Api
         }
 
         foreach ($collection as $keys) {
+            $serializedTags = @serialize($keys);
+            if (preg_match('/(cpg|cms_page)/i', $serializedTags) !== false) {
+                \Magento\Framework\Debugger::getInstance()->enable();
+                \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
+                    'keys' => $keys,
+                    'result' => $result,
+                    'payload' => $payload
+                ]);
+            }
+
             $payload = json_encode(['surrogate_keys' => $keys]);
             $result = $this->_purge($uri, null, Request::METHOD_POST, $payload);
-
-            \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
-                'keys' => $keys,
-                'result' => $result,
-                'payload' => $payload
-            ]);
 
             if ($result['status']) {
                 foreach ($keys as $key) {
@@ -247,6 +251,8 @@ class Api
                 $this->stackTrace($type . join(" ", $keys));
             }
         }
+
+        \Magento\Framework\Debugger::getInstance()->disable();
 
         return $result['status'];
     }
@@ -364,7 +370,7 @@ class Api
             \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
                 'result' => $result
             ]);
-
+            \Magento\Framework\Debugger::getInstance()->disable();
         }
 
         if (empty($type)) {

@@ -55,6 +55,11 @@ class PurgeCache
      */
     public function sendPurgeRequest($pattern = '')
     {
+        $serializedTags = serialize($pattern);
+        if (preg_match('/(cpg|cms_page)/i', $serializedTags) !== false) {
+            \Magento\Framework\Debugger::getInstance()->enable();
+        }
+
         if (empty($pattern)) {
             if ($this->config->canPreserveStatic()) {
                 $result = $this->api->cleanBySurrogateKey(['text']);
