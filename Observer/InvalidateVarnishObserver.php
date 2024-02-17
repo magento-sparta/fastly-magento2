@@ -77,7 +77,7 @@ class InvalidateVarnishObserver implements ObserverInterface
             if ($object instanceof \Magento\Framework\DataObject\IdentityInterface && $this->canPurgeObject($object)) {
                 $tags = [];
 
-                $identities = $object->getIdentities();
+                $identities = json_encode($object->getIdentities());
                 if (preg_match('/(cpg|cms_page)/i', $identities) !== false) {
                     \Magento\Framework\Debugger::getInstance()->enable();
                 }
