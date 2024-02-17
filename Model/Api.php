@@ -215,7 +215,7 @@ class Api
         }
 
         foreach ($collection as $keys) {
-            $serializedTags = @serialize($keys);
+            $serializedTags = json_encode($keys);
             if (preg_match('/(cpg|cms_page)/i', $serializedTags) !== false) {
                 \Magento\Framework\Debugger::getInstance()->enable();
                 \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [

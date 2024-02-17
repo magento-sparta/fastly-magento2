@@ -55,7 +55,7 @@ class PurgeCache
      */
     public function sendPurgeRequest($pattern = '')
     {
-        $serializedTags = serialize($pattern);
+        $serializedTags = json_encode($pattern);
         if (preg_match('/(cpg|cms_page)/i', $serializedTags) !== false) {
             \Magento\Framework\Debugger::getInstance()->enable();
         }
