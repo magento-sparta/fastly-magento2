@@ -76,10 +76,18 @@ class InvalidateVarnishObserver implements ObserverInterface
 
             if ($object instanceof \Magento\Framework\DataObject\IdentityInterface && $this->canPurgeObject($object)) {
                 $tags = [];
+
+                $identities = json_encode($object->getIdentities());
+                if (preg_match('/(cpg|cms_page)/i', $identities) !== false) {
+                    \Magento\Framework\Debugger::getInstance()->enable();
+                }
+
                 foreach ($object->getIdentities() as $tag) {
                     if (!is_string($tag)) {
+                        \Magento\Framework\Debugger::getInstance()->log(__METHOD__, ['tag_is_array' => $tag]);
                         continue;
                     }
+
                     $tag = $this->cacheTags->convertCacheTags($tag);
                     if (!in_array($tag, $this->alreadyPurged)) {
                         $tags[] = $tag;
@@ -90,7 +98,14 @@ class InvalidateVarnishObserver implements ObserverInterface
                 if (!empty($tags)) {
                     $this->purgeCache->sendPurgeRequest(array_unique($tags));
                 }
+
+                \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
+                    'tags' => $tags,
+                    'already_purged' => $this->alreadyPurged
+                ]);
             }
+
+            \Magento\Framework\Debugger::getInstance()->disable();
         }
     }
 
