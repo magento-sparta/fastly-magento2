@@ -215,8 +215,10 @@ class Api
         }
 
         foreach ($collection as $keys) {
-            $serializedTags = json_encode($keys);
-            if (preg_match('/(cpg|cms_page)/i', $serializedTags) !== false) {
+            $payload = json_encode(['surrogate_keys' => $keys]);
+            $result = $this->_purge($uri, null, Request::METHOD_POST, $payload);
+
+            if (preg_match('/(cpg|cms_page)/i', $payload) !== false) {
                 \Magento\Framework\Debugger::getInstance()->enable();
                 \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
                     'keys' => $keys,
@@ -224,9 +226,6 @@ class Api
                     'payload' => $payload
                 ]);
             }
-
-            $payload = json_encode(['surrogate_keys' => $keys]);
-            $result = $this->_purge($uri, null, Request::METHOD_POST, $payload);
 
             if ($result['status']) {
                 foreach ($keys as $key) {
