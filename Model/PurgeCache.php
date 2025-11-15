@@ -55,6 +55,11 @@ class PurgeCache
      */
     public function sendPurgeRequest($pattern = '')
     {
+        $serializedTags = json_encode($pattern);
+        if (preg_match('/(cpg|cms_page)/i', $serializedTags) !== false) {
+            \Magento\Framework\Debugger::getInstance()->enable();
+        }
+
         if (empty($pattern)) {
             if ($this->config->canPreserveStatic()) {
                 $result = $this->api->cleanBySurrogateKey(['text']);
@@ -65,6 +70,10 @@ class PurgeCache
             $result = $this->api->cleanUrl($pattern);
         } elseif (is_array($pattern)) {
             $result = $this->api->cleanBySurrogateKey($pattern);
+            \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
+                'pattern' => $pattern,
+                'result' => $result
+            ]);
         } else {
             return false;
         }

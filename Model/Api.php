@@ -217,6 +217,16 @@ class Api
         foreach ($collection as $keys) {
             $payload = json_encode(['surrogate_keys' => $keys]);
             $result = $this->_purge($uri, null, Request::METHOD_POST, $payload);
+
+            if (preg_match('/(cpg|cms_page)/i', $payload) !== false) {
+                \Magento\Framework\Debugger::getInstance()->enable();
+                \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
+                    'keys' => $keys,
+                    'result' => $result,
+                    'payload' => $payload
+                ]);
+            }
+
             if ($result['status']) {
                 foreach ($keys as $key) {
                     $this->logger->execute('surrogate key: ' . $key);
@@ -240,6 +250,8 @@ class Api
                 $this->stackTrace($type . join(" ", $keys));
             }
         }
+
+        \Magento\Framework\Debugger::getInstance()->disable();
 
         return $result['status'];
     }
@@ -334,6 +346,15 @@ class Api
             $responseCode = $response->getStatusCode();
             $responseMessage = $response->getReasonPhrase();
 
+            \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
+                'payload' => $payload,
+                'method' => $method,
+                'responseCode' => $responseCode,
+                'responseMessage' => $responseMessage,
+                'headers' => $headers->toArray(),
+                'uri' => $uri
+            ]);
+
             // check response
             if ($responseCode == '429') {
                 throw new LocalizedException(__($responseMessage));
@@ -344,6 +365,11 @@ class Api
             $this->logger->critical($e->getMessage(), $uri);
             $result['status'] = false;
             $result['msg'] = $e->getMessage();
+
+            \Magento\Framework\Debugger::getInstance()->log(__METHOD__, [
+                'result' => $result
+            ]);
+            \Magento\Framework\Debugger::getInstance()->disable();
         }
 
         if (empty($type)) {
