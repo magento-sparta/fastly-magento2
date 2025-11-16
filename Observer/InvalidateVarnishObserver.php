@@ -93,6 +93,19 @@ class InvalidateVarnishObserver implements ObserverInterface
                 }
 
                 if (!empty($tags)) {
+                    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+                    $isLogEnabled = $objectManager->get('Magento\Framework\App\Config\ScopeConfigInterface')->getValue('admin/debug/log_enabled');
+                    if ($isLogEnabled) {
+                        \Magento\Framework\Debugger::getInstance()->log(
+                            __METHOD__,
+                            [
+                                'message' => 'ACSD-68775 - Fastly sendPurgeRequest',
+                                'tags' => array_unique($tags),
+                                'event' => $observer->getEvent()->getName()
+                            ],
+                            false
+                        );
+                    }
                     $this->purgeCache->sendPurgeRequest(array_unique($tags));
                 }
             }
